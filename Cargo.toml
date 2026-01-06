@@ -1,0 +1,10 @@
+[package]
+name = "w_engine"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+glfw = "0.61"
+gl = "0.14.0"
+glam = "0.30.9"
+uuid = { version = "1.10", features = ["v4", "fast-rng"] } 
