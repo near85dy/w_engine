@@ -12,7 +12,7 @@ pub struct Camera {
 impl Camera {
     pub fn new() -> Self {
         Self {
-            position: Vec3::new(0.0,0.0,2.0),
+            position: Vec3::ZERO,
             rotation: Quat::IDENTITY,
             fov: 90.0_f32.to_radians(),
             aspect: 16.0/9.0,

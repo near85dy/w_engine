@@ -1,7 +1,7 @@
 use std::{ffi::CString, fs, ptr};
 
 use gl::{GetUniformLocation, types::{self, GLuint}};
-use glam::Mat4;
+use glam::{Mat4, Vec3};
 
 
 pub struct Shader {
@@ -64,6 +64,14 @@ impl Shader {
         unsafe {
             let location_id = gl::GetUniformLocation(self.program_id, location_name.as_ptr());
             gl::UniformMatrix4fv(location_id, 1, gl::FALSE, matrix.as_ref().as_ptr());
+        }
+    }
+
+    pub fn set_vec3(&self, location_name: CString, vec: Vec3)
+    {
+        unsafe {
+            let location_id = gl::GetUniformLocation(self.program_id, location_name.as_ptr());
+            gl::Uniform3f(location_id, vec.x, vec.y, vec.z);
         }
     }
 }

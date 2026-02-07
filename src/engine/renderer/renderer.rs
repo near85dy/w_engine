@@ -1,14 +1,26 @@
 use std::{collections::HashMap, ffi::CString};
 
-use gl::{self, types::{GLfloat, GLuint}};
+use gl::{self};
+use glam::Vec3;
 use uuid::Uuid;
 
-use crate::engine::renderer::{camera::Camera, gpu_mesh::GpuMesh, render_command::RenderCommand, render_object_data::RenderObjectData, shader::Shader, transform::Transform};
+use crate::engine::{
+    renderer::{
+        camera::Camera, 
+        gpu_mesh::GpuMesh, 
+        gpu_texture::{GpuTexture}, 
+        render_command::RenderCommand, 
+        render_object_data::RenderObjectData, 
+        shader::Shader, 
+        transform::Transform
+    }};
 
 pub struct Renderer {
    shader_list: HashMap<String, Shader>,
    mesh_list: HashMap<Uuid, RenderObjectData>,
+   texture_list: HashMap<Uuid, GpuTexture>,
    camera: Camera,
+   light_position: Vec3,
 }
 
 impl Renderer {
@@ -23,7 +35,9 @@ impl Renderer {
         Self {
             mesh_list: HashMap::new(),
             shader_list: HashMap::new(),
+            texture_list: HashMap::new(),
             camera: Camera::new(),
+            light_position: Vec3::ZERO,
         }
     }
 
@@ -32,7 +46,7 @@ impl Renderer {
         let mut shader: Shader = Shader::new();
         shader.create_shader(String::from("base_shader")).unwrap();
         self.shader_list.insert(String::from("base_shader"), shader);
-
+        
         //unsafe { gl::PolygonMode(gl::FRONT_AND_BACK, gl::LINE); }
     }
 
@@ -47,7 +61,7 @@ impl Renderer {
 
         for command in render_commands {
             match command {
-                RenderCommand::CreateMesh { id, vertices, indices } => { 
+                RenderCommand::LoadMesh { id, vertices, indices } => { 
                     let mesh = GpuMesh::new(id, vertices, indices);
                     let render_data = RenderObjectData::new(mesh);
                     self.mesh_list.insert(id.clone(), render_data);
@@ -77,6 +91,22 @@ impl Renderer {
                         eprintln!("DrawMesh called for missing mesh: {:?}", id);
                     }
                 },
+                RenderCommand::LoadTexture { id, width, height, image } => {
+                    let texture = GpuTexture::new(image, width, height);
+                    self.texture_list.insert(id, texture);
+                }
+                RenderCommand::BindTexture { id } => {
+                    if let Some(texture) = self.texture_list.get_mut(&id) {
+                        unsafe {
+                            gl::ActiveTexture(gl::TEXTURE0);
+                            gl::BindTexture(gl::TEXTURE_2D, texture.texture_id());
+                        };
+                    }
+                }
+                RenderCommand::TransformCamera { position, rotation } => {
+                    self.camera.position = position;
+                    self.camera.rotation = rotation;
+                }
                 _ => {
                     println!("Unknown render command");
                 }

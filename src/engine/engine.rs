@@ -1,15 +1,10 @@
-use std::collections::HashMap;
-use std::ffi::CString;
 use std::sync::{mpsc, Arc, Mutex};
 use std::thread;
-use std::time::Duration;
-use uuid::Uuid;
 
 use crate::engine::core::core::Core;
 use crate::engine::renderer::render_command::RenderCommand;
 use crate::engine::renderer::{Renderer};
 use crate::engine::glfw::GLFW;
-use crate::engine::resource_manager::model_loader::ModelLoader;
 
 pub struct Engine {}
 
@@ -50,6 +45,7 @@ impl Engine {
         // ------------- Main thread logic ------------
 
         let mut core = Core::new();
+        core.initialize();
 
         let mut render_commands: Vec<RenderCommand> = Vec::new();
 

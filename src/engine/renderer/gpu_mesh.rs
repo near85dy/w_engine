@@ -1,4 +1,4 @@
-use gl::types::{GLfloat, GLuint};
+use gl::types::{GLfloat, GLsizeiptr, GLuint, GLvoid};
 use uuid::Uuid;
 
 
@@ -7,12 +7,12 @@ pub struct GpuMesh {
     vbo: GLuint,
     vao: GLuint,
     ebo: GLuint,
-    pub vertices: Vec<f32>,
+    pub vertices: Vec<[f32; 5]>,
     pub indices: Vec<i32>
 }
 
 impl GpuMesh {
-    pub fn new(id: Uuid, vertices: Vec<f32>, indices: Vec<i32>) -> Self {
+    pub fn new(id: Uuid, vertices: Vec<[f32; 5]>, indices: Vec<i32>) -> Self {
         let mut vbo = 0;
         let mut vao = 0;
         let mut ebo = 0;
@@ -26,7 +26,7 @@ impl GpuMesh {
 
             gl::BindBuffer(gl::ARRAY_BUFFER, vbo);
             gl::BufferData(gl::ARRAY_BUFFER,
-                (vertices.len() * std::mem::size_of::<GLfloat>()) as isize,
+                (vertices.len() * std::mem::size_of::<[f32; 5]>()) as GLsizeiptr,
                 vertices.as_ptr() as *const _, 
                 gl::STATIC_DRAW,
             );  
@@ -38,10 +38,20 @@ impl GpuMesh {
                 gl::STATIC_DRAW
             );
 
-            gl::VertexAttribPointer(0, 3, gl::FLOAT, gl::FALSE, 
-                (3*std::mem::size_of::<GLfloat>()) as i32, std::ptr::null());
+            gl::VertexAttribPointer(0, 3, 
+                gl::FLOAT, gl::FALSE, 
+                (5*std::mem::size_of::<GLfloat>()) as i32, 
+                std::ptr::null()
+            );
             
             gl::EnableVertexAttribArray(0);
+
+            gl::VertexAttribPointer(1, 2, 
+                gl::FLOAT, gl::FALSE, 
+                (5*std::mem::size_of::<GLfloat>()) as i32, 
+                (3 * std::mem::size_of::<GLfloat>()) as *const GLvoid
+            );
+            gl::EnableVertexAttribArray(1);
             gl::BindVertexArray(0);
         };
 

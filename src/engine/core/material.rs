@@ -5,7 +5,9 @@ pub struct Material {
     pub base_color: Vec3,
     pub metallic: f32,
     pub roughness: f32,
-    pub texture_id: Uuid,
+    pub albedo_id: Uuid,
+    pub roughness_id: Uuid,
+    pub normal_id: Uuid,
 }
 
 impl Material {
